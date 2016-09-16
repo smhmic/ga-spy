@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.5
+ * @version 0.5.1
  */
 
 (
@@ -45,7 +45,7 @@ function gaSpy( listener ){
 	 */
 	handler   = function( a ){
 		try { 
-			return ( a[0] && a[0].substr && a[0].substr( 0, 4 ) == 'gtm.' ) 
+			return ( a[0] && a[0].substr && a[0].substr( 0, 3 ) == 'gtm' ) 
 			       || ( false !== listener( a ) );
 		} catch( ex ){ console.error( ex ) }
 	},
@@ -53,7 +53,7 @@ function gaSpy( listener ){
 	/**
 	 * The function that will replace `ga()`.  Passes arguments to handler; if
 	 *   handler returns false also passes arguments to `ga()`.
-     * @member {Object} gaOrig - The original `ga()` object.
+	 * @member {Object} gaOrig - The original `ga()` object.
 	 * @returns {*|boolean}    - Returns false to indicate that `ga()` should
 	 *                           should not be called for this set of arguments.
 	 */

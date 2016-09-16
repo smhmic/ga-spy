@@ -35,7 +35,7 @@
     // If returns false, arguments will not be passed through to _gaq.push.
     handler = function( a ){ try{
       // If command is not via GTM Tag, return result of custom code.
-      return ( a[0] && a[0][0] && a[0][0].substr && a[0][0].substr( 0, 4 ) == 'gtm.' )
+      return ( a[0] && a[0][0] && a[0][0].substr && a[0][0].substr( 0, 3 ) == 'gtm' )
           || ( false !== callback( a ) );
     }catch(ex){ console.error(ex) } },
     
