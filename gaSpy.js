@@ -32,10 +32,10 @@ function gaSpy( listener ){
 	gaObjName = window.GoogleAnalyticsObject || 'ga',
 	
 	/** The global ga object. */
-	ga        = window[gaObjName],
+	ga = window[gaObjName],
 
 	/** Permit use of `console` cross-browser. */
-	console   = window.console || {error : function(){}},
+	console = window.console || {error : function(){}},
 
 	/**
 	 * Processes each set of passed to `ga()`.
@@ -43,7 +43,7 @@ function gaSpy( listener ){
 	 * @returns {*|boolean} - Returns false to indicate that `ga()` should
 	 *                        should not be called for this set of arguments.
 	 */
-	handler   = function( a ){
+	processArgs = function( a ){
 		try { 
 			return ( a[0] && a[0].substr && a[0].substr( 0, 3 ) == 'gtm' ) 
 			       || ( false !== listener( a ) );
@@ -51,30 +51,31 @@ function gaSpy( listener ){
 	},
 	    
 	/**
-	 * The function that will replace `ga()`.  Passes arguments to handler; if
-	 *   handler returns false also passes arguments to `ga()`.
+	 * The function that will replace `ga()`.  Passes arguments to processArgs; if
+	 *   processArgs returns false also passes arguments to `ga()`.
 	 * @member {Object} gaOrig - The original `ga()` object.
 	 * @returns {*|boolean}    - Returns false to indicate that `ga()` should
 	 *                           should not be called for this set of arguments.
 	 */
-	proxy   = function(){
+	proxy = function(){
 		var a = [].slice.call( arguments );
-		if( handler( a ) ) return proxy.gaOrig.apply( proxy.gaOrig, a );
+		if( processArgs( a ) !== false ) return proxy.gaOrig.apply( proxy.gaOrig, a );
 	},
 	    
-	/** Replaces global GA object with a proxy. */
-	hijack       = function(){
-		var a, k, gaOrig = proxy.gaOrig = window[gaObjName];
+	/** Replaces global GA object with a proxy. Assumes global object exists. */
+	hijack = function(){
+		// The current global GA object.  Could be the command queue or the loaded GA object.
+		var k, gaOrig = proxy.gaOrig = window[gaObjName];
 		// Replace GA object with a proxy.
 		window[gaObjName] = proxy;
-		// Ensure methods/members of GA object remain accessible on the proxy. 
+		// Maintain references to GA's public interface. 
 		for( k in gaOrig )
 			if( gaOrig.hasOwnProperty( k ) )
 				window[gaObjName][k] = gaOrig[k];
 	};
-
+	
 	if( !ga ){
-		// Instantiate GA command queue a la UA snippet.
+	// Instantiate GA command queue a la UA snippet.
 		ga = window[gaObjName] = function(){
 			(window[gaObjName].q = window[gaObjName].q || []).push( arguments ); };
 		ga.l = 1 * new Date();
@@ -86,20 +87,17 @@ function gaSpy( listener ){
 		if( ga.q ){
 			// Run all existing command queue items through custom code.
 			for( q = [], i = 0; i < ga.q.length; i++ )
-				if( handler( [].slice.call( ga.q[i] ) ) )
+				if( processArgs( [].slice.call( ga.q[i] ) ) )
 					q.push( ga.q[i] );
 			ga.q = q;
-		} else {
-			// No commands queued yet, instantiate queue.
-			ga.q = [];
-		}
+		} else { ga.q = []; } // No commands queued yet, instantiate queue.
 		ga( hijack );
 		hijack();
 	} else {
 		throw new Error( 'gaSpy aborting; `'+gaObjName+'` not the GA object.' );
 	}
 
-})( function( a ){
+})( function( a ){ 
 	/** @var [Array] a - arguments passed to `ga()` **/
 
 	//   v  v  v  CUSTOM CODE GOES HERE  v  v  v  
@@ -109,7 +107,7 @@ function gaSpy( listener ){
 
 	// ARGUMENTS passed to the GA object are available in the array `a`.
 	// See GA documentation for parameter formats: https://goo.gl/muCY7Q
-
+	
 	// FOR DEBUGGING: console.debug.apply( console, a );
 
 	// EXAMPLES: https://git.io/vK4VJ
