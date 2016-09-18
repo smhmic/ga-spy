@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.5.1
+ * @version 0.5.2
  */
 
 (
@@ -46,6 +46,7 @@ function gaSpy( listener ){
 	processArgs = function( a ){
 		try { 
 			return ( a[0] && a[0].substr && a[0].substr( 0, 3 ) == 'gtm' ) 
+			       || ( a[a.length-1] && a[a.length-1].name && a[a.length-1].name.substr && a[a.length-1].name.substr( 0, 3 ) == 'gtm' )
 			       || ( false !== listener( a ) );
 		} catch( ex ){ console.error( ex ) }
 	},
