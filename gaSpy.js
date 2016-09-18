@@ -100,19 +100,19 @@ function gaSpy( listener ){
 })( function( a ){ 
 	/** @var [Array] a - arguments passed to `ga()` **/
 
-	//   v  v  v  CUSTOM CODE GOES HERE  v  v  v  
-
 	// RETURN FALSE to prevent original hit from firing.
 	// By default, the original hit fires just as it normally would.
 
 	// ARGUMENTS passed to the GA object are available in the array `a`.
 	// See GA documentation for parameter formats: https://goo.gl/muCY7Q
-	
-	// FOR DEBUGGING: console.debug.apply( console, a );
 
 	// EXAMPLES: https://git.io/vK4VJ
 
-
+	//   v  v  v  CUSTOM CODE GOES HERE  v  v  v  
+	
+	
+	console.debug.apply( console, a ); // FOR DEBUGGING
+	
 
 	//   ^  ^  ^  CUSTOM CODE END  ^  ^  ^   
 
