@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.5.3
+ * @version 0.5.4
  */
 
 (
@@ -27,6 +27,7 @@
  * @param {Object|function} listenerCallback_or_configObj
  * 			  If function, will be treated as `callback` of listener config, otherwise listener config object.
  * 				@property {function} callback
+ * 			  @property {string} gaObjName - The name of the global ga object. Default: "ga".
  */
 function gaSpy( listenerCallback_or_configObj ){
   
@@ -35,6 +36,7 @@ function gaSpy( listenerCallback_or_configObj ){
     listenerCallback_or_configObj = null;
     if( !config.callback || 'function' !== typeof config.callback )
       throw new Error( '[gaSpy] Aborting; No listener callback provided.' );
+    config.gaObjName = window.GoogleAnalyticsObject || 'ga';
     return config;
   })('function' === typeof listenerCallback_or_configObj
     ? { 'callback' : listenerCallback_or_configObj }
@@ -44,7 +46,7 @@ function gaSpy( listenerCallback_or_configObj ){
   q, i,
    
   /** The name of the global ga object. */
-  gaObjName = window.GoogleAnalyticsObject || 'ga',
+  gaObjName = config.gaObjName,
   
   /** The global ga object. */
   ga = window[gaObjName],
