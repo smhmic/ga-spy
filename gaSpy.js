@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.5.4
+ * @version 0.5.5
  */
 
 (
@@ -62,11 +62,10 @@ function gaSpy( listenerCallback_or_configObj ){
    *                        should not be called for this set of arguments.
    */
   processArgs = function( a ){
-    try { return ( a[0] && a[0].substr && a[0].substr( 0, 3 ) == 'gtm' ) 
-              || ( a[a.length-1] && a[a.length-1].name && a[a.length-1].name.substr
-                   && a[a.length-1].name.substr( 0, 3 ) == 'gtm' )
-              || ( false !== config.callback( a ) );
-    } catch( ex ){ console.error( ex ) } 
+    return ( a[0] && a[0].substr && a[0].substr( 0, 3 ) == 'gtm' ) 
+            || ( a[a.length-1] && a[a.length-1].name && a[a.length-1].name.substr
+                 && a[a.length-1].name.substr( 0, 3 ) == 'gtm' )
+            || ( false !== config.callback( a ) );
   },
       
   /**
@@ -79,7 +78,9 @@ function gaSpy( listenerCallback_or_configObj ){
    */
   proxy = function(){
     var a = [].slice.call( arguments );
-    if( processArgs( a ) !== false ) return proxy.gaOrig.apply( proxy.gaOrig, a );
+    try { if( processArgs( a ) === false ) return; 
+    } catch( ex ){ console.error( ex ) }
+    return proxy.gaOrig.apply( proxy.gaOrig, a );
   },
       
   /** 
