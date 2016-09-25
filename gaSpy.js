@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.5.6
+ * @version 0.6.0
  */
 
 (
@@ -57,15 +57,33 @@ function gaSpy( listenerCallback_or_configObj ){
   /**
    * @function processArgs
    * Processes each set of arguments passed to `ga()`.
-   * @param   {Array} a   - Array of arguments passed to `ga()`.
-   * @returns {*|boolean} - Returns false to indicate that `ga()` should
-   *                        should not be called for this set of arguments.
+   * @param   {Array} a - Array of arguments passed to `ga()`.
+   * @returns {boolean} - Returns false to indicate that `ga()` should
+   *                      should not be called for this set of arguments.
    */
   processArgs = function( a ){
-    return ( a[0] && a[0].substr && a[0].substr( 0, 3 ) == 'gtm' ) 
-            || ( a[a.length-1] && a[a.length-1].name && a[a.length-1].name.substr
-                 && a[a.length-1].name.substr( 0, 3 ) == 'gtm' )
-            || ( false !== config.callback( a ) );
+    // Parse command according to https://developers.google.com/analytics/devguides/collection/analyticsjs/command-queue-reference
+    var _commandParts, the = {};
+    if( 'function' === typeof a[0] ){
+      the.callback = a[0];
+    }else if( a[0] && a[0].split ){
+      _commandParts = a[0].split( '.', 1 );
+      the.trackerName = _commandParts.length > 1 ? _commandParts[0] : 't0';
+      the.command = _commandParts.length > 1 ? _commandParts[1] : _commandParts[0];
+      _commandParts  = _commandParts[ _commandParts.length-1 ].split( ':' );
+      the.pluginName = _commandParts.length > 1 ? _commandParts[0] : undefined;
+      the.pluginMethodName = _commandParts.length > 1 ? _commandParts[1] : undefined;
+      if( the.command === 'require' || the.command === 'provide' ){
+        the.pluginName = a[1];
+        if( the.command === 'provide' ) the.pluginConstructor = a[2];
+      }else if( 'object' === typeof a[a.length-1] ){
+        the.trackerName = a[a.length-1].name || the.trackerName;
+      }
+    }
+    // Automatically allow (do not call listener) commands that come from GTM.
+    if( the.trackerName.substr( 0, 3 ) === 'gtm' ) return true;
+    // Call listener; return false only if listener returns false.
+    return false !== config.callback( a, the, config );
   },
       
   /**
@@ -120,9 +138,11 @@ function gaSpy( listenerCallback_or_configObj ){
     throw new Error( '[gaSpy] Aborting; `'+gaObjName+'` not the GA object.' );
   }
 
-})( function( a ){ 
-  /** @var [Array] a - arguments passed to `ga()` **/
-
+})( function( a, the, config ){ 
+  /** @var [Array]  a      - arguments passed to `ga()` **/
+  /** @var [Object] the    - parsed hit data; provides tracker name, plugin name/method/etc. **/
+  /** @var [Object] config - The listener config object. **/
+    
   // RETURN FALSE to prevent original hit from firing.
   // By default, the original hit fires just as it normally would.
 
