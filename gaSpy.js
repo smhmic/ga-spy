@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.5.5
+ * @version 0.5.6
  */
 
 (
@@ -36,7 +36,7 @@ function gaSpy( listenerCallback_or_configObj ){
     listenerCallback_or_configObj = null;
     if( !config.callback || 'function' !== typeof config.callback )
       throw new Error( '[gaSpy] Aborting; No listener callback provided.' );
-    config.gaObjName = window.GoogleAnalyticsObject || 'ga';
+    config.gaObjName = config.gaObjName || window.GoogleAnalyticsObject || 'ga';
     return config;
   })('function' === typeof listenerCallback_or_configObj
     ? { 'callback' : listenerCallback_or_configObj }
