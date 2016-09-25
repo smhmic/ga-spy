@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.6.0
+ * @version 0.6.1
  */
 
 (
@@ -80,7 +80,7 @@ function gaSpy( listenerCallback_or_configObj ){
     if( 'function' === typeof a[0] ){
       the.callback = a[0];
     }else if( a[0] && a[0].split ){
-      _commandParts = a[0].split( '.', 1 );
+      _commandParts = a[0].split( '.' );
       the.trackerName = _commandParts.length > 1 ? _commandParts[0] : 't0';
       the.command = _commandParts.length > 1 ? _commandParts[1] : _commandParts[0];
       _commandParts  = _commandParts[ _commandParts.length-1 ].split( ':' );
