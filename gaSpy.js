@@ -18,20 +18,33 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.6.1
+ * @version 0.7
  */
 
-(
+/**
+ * @callback gaSpyCb 
+ * Function to call whenever `ga()` is called.
+ * @param {Array}  a      - Arguments passed to `ga()`. @link https://goo.gl/muCY7Q
+ * @param {Object} the    - Provides tracker name, plugin name/method/etc parsed from the command.
+ *     @param {Function|undefined} the.callback
+ *     @param   {string|undefined} the.command
+ *     @param   {string|undefined} the.trackerName
+ *     @param   {string|undefined} the.pluginName
+ *     @param   {string|undefined} the.pluginMethodName
+ * @param {Object} config - The listener config object.
+ * @return {boolean|*} - Return false to prevent command from being passed to analytics.js.
+ */
+
 /** 
  * @function gaSpy
- * @param {Object|function} listenerCallback_or_configObj
- * 			  If function, will be treated as `callback` of listener config, otherwise listener config object.
- * 				@property {function} callback  - Function to call whenever `ga()` is called.
- * 			  @property {string}   gaObjName - The name of the global ga object. Default: "ga".
- * 			  @property {boolean}  debug     - Set true to activate logging and avoid try/catch protection. Default: false.
- * 			  @property {boolean}  debugLogPrefix - String with which to prefix log messages. Default: "gaSpy".
+ * @param {Object|function} listenerCallback_or_configObj - If function, will be treated as `callback` of 
+ *                                                          listener config, otherwise listener config object.
+ *     @property {gaSpyCb}  callback  - Function to call whenever `ga()` is called.
+ *     @property {string}   gaObjName - The name of the global ga object. Default: "ga".
+ * 	   @property {boolean}  debug     - Set true to activate logging and avoid try/catch protection. Default: false.
+ *     @property {boolean}  debugLogPrefix - String with which to prefix log messages. Default: "gaSpy".
  */
-function gaSpy( listenerCallback_or_configObj ){
+;window.gaSpy = function gaSpy( listenerCallback_or_configObj ){
   
   /** Listener configuration. **/
   var config = (function( config ){
@@ -161,25 +174,7 @@ function gaSpy( listenerCallback_or_configObj ){
     throw new Error( '['+config.debugLogPrefix+'] Aborting; `'+gaObjName+'` not the GA object.' );
   }
 
-})( function( a, the, config ){ 
-  /** @var [Array]  a      - arguments passed to `ga()` **/
-  /** @var [Object] the    - parsed hit data; provides tracker name, plugin name/method/etc. **/
-  /** @var [Object] config - The listener config object. **/
-    
-  // RETURN FALSE to prevent original hit from firing.
-  // By default, the original hit fires just as it normally would.
+};
 
-  // ARGUMENTS passed to the GA object are available in the array `a`.
-  // See GA documentation for parameter formats: https://goo.gl/muCY7Q
 
-  // EXAMPLES: https://git.io/vK4VJ
 
-  //   v  v  v  CUSTOM CODE GOES HERE  v  v  v  
-  
-  
-  console.debug.apply( console, a ); // FOR DEBUGGING
-  
-
-  //   ^  ^  ^  CUSTOM CODE END  ^  ^  ^   
-
-} );
