@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.7
+ * @version 0.7.1
  */
 
 /**
@@ -29,6 +29,7 @@
  *     @param {Function|undefined} the.callback
  *     @param   {string|undefined} the.command
  *     @param   {string|undefined} the.trackerName
+ *     @param   {string|undefined} the.hitType
  *     @param   {string|undefined} the.pluginName
  *     @param   {string|undefined} the.pluginMethodName
  * @param {Object} config - The listener config object.
@@ -102,8 +103,12 @@
       if( the.command === 'require' || the.command === 'provide' ){
         the.pluginName = a[1];
         if( the.command === 'provide' ) the.pluginConstructor = a[2];
-      }else if( 'object' === typeof a[a.length-1] ){
-        the.trackerName = a[a.length-1].name || the.trackerName;
+      }else{
+        if( the.command === 'send' )
+          the.hitType = a[a.length-1].hitType || a[1];
+        if( 'object' === typeof a[a.length-1] ){
+          the.trackerName = a[a.length-1].name || the.trackerName;
+        }
       }
     }
     log( 'Run listener callback', the );
