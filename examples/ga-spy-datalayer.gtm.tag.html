@@ -1,0 +1,103 @@
+<script title="gtm:ga-spy-to-datalayer">
+/**
+ * Expose all non-GTM-based ga commands to GTM via the data layer.
+ * 
+ * https://github.com/smhmic/gaSpy/
+ * @version 0.8
+ */
+
+var dataLayer = window.dataLayer,
+    dataLayerNamespace = 'spy.ga';
+ 
+(function(e){var n,t,o=function(n){if(e=null,!n.callback||"function"!=typeof n.callback)throw Error("["+n.debugLogPrefix+"] Aborting; No listener callback provided.");return n.gaObjName=n.gaObjName||window.GoogleAnalyticsObject||"ga",n.debug=!!n.debug,n.debugLogPrefix=n.debugLogPrefix||"gaSpy",n}("function"==typeof e?{callback:e}:e),a=o.gaObjName,i=window[a],l=window.console&&o.debug?function(){var e=[].slice.call(arguments);e.unshift("["+o.debugLogPrefix+"]"),console.log.apply(console,e)}:function(){},r=function(e){var n,t={};return o.debug&&function(n,t){for(n="Intercepted: ga(",t=0;t<e.length;t++)n+="string"==typeof e[t]?'"'+e[t]+'"':e[t],t+1<e.length&&(n+=", ");n+=")",l(n)}(),"function"==typeof e[0]?t.callback=e[0]:e[0]&&e[0].split&&(n=e[0].split("."),t.trackerName=n.length>1?n[0]:"t0",t.command=n.length>1?n[1]:n[0],n=n[n.length-1].split(":"),t.pluginName=n.length>1?n[0]:void 0,t.pluginMethodName=n.length>1?n[1]:void 0,"require"===t.command||"provide"===t.command?(t.pluginName=e[1],"provide"===t.command&&(t.pluginConstructor=e[2])):("send"===t.command&&(t.hitType=e[e.length-1].hitType||e[1]),"object"==typeof e[e.length-1]&&(t.trackerName=e[e.length-1].name||t.trackerName))),l("Run listener callback",t),!1===o.callback(e,t)?l("Block hit")||!1:!0},c=function(){var e=[].slice.call(arguments);if(o.debug){if(!r(e))return}else try{if(!r(e))return}catch(n){}return c.gaOrig.apply(c.gaOrig,e)},g=function(){var e,n=c.gaOrig=window[a];l("Hijack",n.gaOrig?"(already hijacked)":""),window[a]=c;for(e in n)n.hasOwnProperty(e)&&(window[a][e]=n[e])};if(l("Config:",o),i||(l("Instantiate GA command queue"),i=window[a]=function(){(window[a].q=window[a].q||[]).push(arguments)},i.l=1*new Date),i.getAll)l("GA already loaded; cannot see previous commands"),g();else{if(!i.l)throw Error("["+o.debugLogPrefix+"] Aborting; `"+a+"` not the GA object.");if(l("Command queue instantiated, but library not yet loaded"),i.q&&i.q.length){for(l("Applying listener to",i.q.length," queued commands"),n=[],t=0;t<i.q.length;t++)r([].slice.call(i.q[t]))&&n.push(i.q[t]);i.q=n}else i.q=[];i(g),g()}}
+)( function( a, the ){
+	 
+	var scope = '', frame = {};
+	 
+    // If last argument is object, use as fields object.
+	var fields = typeof a[a.length-1] == 'object' ? a.pop() : {};
+
+	// Ignore callbacks.
+	if( the.callback ) return;
+	
+	// Ignore commands from GTM.
+	//TODO: Does this work when gtm loads ga plugins (i.e. autolinker)?
+	if( the.trackerName && the.trackerName.substr( 0, 3 ) == 'gtm' ) return;
+	
+	if( the.pluginName ){
+		scope = 'plugin.'+the.pluginName;
+		if( the.command === 'provide' ) 
+			fields = a[2]; // plugin constructor
+		else { 
+			//TODO: provide generic data layer structure for custom arguments
+			// if( command === 'require' ){ }
+		}
+	}
+	else switch( the.command ){
+		
+		case 'create':
+			fields.trackingId   = fields.trackingId   || a[1];
+			fields.cookieDomain = fields.cookieDomain || a[2];
+			fields.name         = fields.name         || a[3];
+			break;
+		
+		case 'set':
+		    if( a[1] ) fields[ a[1] ] = a[2];
+			break;
+		
+		case 'send':
+		    scope = 'hit';
+			switch( fields.hitType = fields.hitType || a[1] ){
+				case 'pageview':
+					fields.page = fields.page || a[2];
+					break;
+				case 'event':
+					fields.eventCategory = fields.eventCategory || a[2];
+					fields.eventAction   = fields.eventAction   || a[3];
+					fields.eventLabel    = fields.eventLabel    || a[4];
+					fields.eventValue    = fields.eventValue    || a[5];
+					break;
+				case 'social':
+					fields.socialNetwork = fields.socialNetwork || a[2];
+					fields.socialAction  = fields.socialAction  || a[3];
+					fields.socialTarget  = fields.socialTarget  || a[4];
+					break;
+				case 'social':
+					fields.timingCategory = fields.timingCategory || a[2];
+					fields.timingVar      = fields.timingVar      || a[3];
+					fields.timingValue    = fields.timingValue    || a[4];
+					fields.timingLabel    = fields.timingLabel    || a[5];
+					break;
+			}
+			break;
+		
+		case 'remove':
+			break;
+		
+		default:
+			scope = 'unknown';
+		
+	}
+	
+	// Push command data to data layer.
+	dataLayerNamespace = dataLayerNamespace+(dataLayerNamespace&&scope?'.':'')+scope;
+	frame[dataLayerNamespace] = fields;
+	frame.event = dataLayerNamespace;
+	dataLayer.push( frame );
+	
+	// The values specified in a send command apply only to the hit; clear them
+	//   immediately after so data layer more closely reflects data in tracker 
+	//   object, and so subsequent hits will not be polluted by prior values.
+	// Instead of this (which adds generic message for every command), it's cleaner
+	//   to accomplish this using a low priority -firing tag (or cleanup tag) that runs:
+	//   `google_tag_manager[{{Container ID}}].dataLayer.set(dataLayerNamespace,undefined);`:
+	if( 'send' === the.command ){
+		frame = {};
+		frame[dataLayerNamespace] = undefined;
+		dataLayer.push( frame );
+	}
+	
+	// return false; <-- Uncomment to block non-GTM commands.
+	
+} );
+</script>
