@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.7.2
+ * @version 0.8
  */
 
 /**
@@ -32,7 +32,6 @@
  *     @param   {string|undefined} the.hitType
  *     @param   {string|undefined} the.pluginName
  *     @param   {string|undefined} the.pluginMethodName
- * @param {Object} config - The listener config object.
  * @return {boolean|*} - Return false to prevent command from being passed to analytics.js.
  */
 
@@ -112,7 +111,7 @@
       }
     }
     log( 'Run listener callback', the );
-    if( false === config.callback( a, the, config ) )
+    if( false === config.callback( a, the ) )
       return log( 'Block hit' ) || false;
     else return true;
   },
