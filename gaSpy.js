@@ -106,9 +106,6 @@
         the.trackerName = a[a.length-1].name || the.trackerName;
       }
     }
-    // Automatically allow (do not call listener) commands that come from GTM.
-    if( the.trackerName.substr( 0, 3 ) === 'gtm' ) 
-      return log( 'Ignore; command is via GTM' ) || true;
     log( 'Run listener callback', the );
     if( false === config.callback( a, the, config ) )
       return log( 'Block hit' ) || false;
