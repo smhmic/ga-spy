@@ -18,7 +18,7 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.7.1
+ * @version 0.7.2
  */
 
 /**
@@ -45,7 +45,7 @@
  * 	   @property {boolean}  debug     - Set true to activate logging and avoid try/catch protection. Default: false.
  *     @property {boolean}  debugLogPrefix - String with which to prefix log messages. Default: "gaSpy".
  */
-;window.gaSpy = function gaSpy( listenerCallback_or_configObj ){
+;window.gaSpy = window.gaSpy || function gaSpy( listenerCallback_or_configObj ){
   
   /** Listener configuration. **/
   var config = (function( config ){
