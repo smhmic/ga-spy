@@ -17,13 +17,16 @@ But there are many more uses in GTM and out.
 - Log GA Commands
 - Queue hits from GTM until GTM pageview fired.
 - Enforce field values or provide defaults for GTM hit tags (in lieu of GTM interface support for creating tracker or defining hit defaults).
+- Build in protection against oversized or malformed hits.
+- Track your tracking (that's a bad idea, isn't it?) (...But actually think about it: dims/metrics format validation, PII detection/blocking. Can integrate with trackinn impl, but doesnt capture all)
+
 
 ## Usage
 
 ### Installation in GTM
 
 To use in GTM, place the contents of ga-spy.gtm.tag.html into a custom html tag,
-then use one of the custom listsners below.
+then use one of the custom listeners below.
 
 If you use ga-spy.gtm.tag.html as the Tag, then you can place the listsner code into
 a Variable named `GA Spy Config` (using ga-spy-config.gtm.var.js as a template). 
@@ -119,7 +122,16 @@ For a robust solution that handles preservation of tracker fields and also wipes
 ![Screenshot: data layer model after hardcoded pageview and event](examples/ga-spy-datalayer.screenshot.png)
 
 
-#### Migrate to GTM
+
+#### Hardcoding GA Spy
+
+If you were to deploy this on page, it's probably better to include gaSpy inline rather than an external script.
+Remember only reason for on-page is to capture pageload-based tracking, and using async or defer is not an option.
+Do not use the gaSpy.js URL from the examples in a production site.  Host it yourself or place it inline.
+
+
+
+#### Hardcoding GA Spy : Migrate to GTM
 
 This can be used to have a seamless migration to GTM without needing to coordinate simultenous updates.
 The catch is that gaSpy needs to be deployed on-page for this to be effective.
@@ -139,6 +151,8 @@ emojis if you wanted. And it has the adavantage of working even when the
 hit does not fire (e.g. not affected by opt-out/tracking-blockers), or 
 when previewing an html file locally, etc.
 
+When used in tandem with other loggers, this log will always be listed first.
+
 This listener callback will print `ga()` arguments exactly as they are given:
 
 ```javascript
@@ -151,7 +165,11 @@ gaSpy( function gaSpy_cb_( a ){
 Or check out [examples/ga-spy-log](examples/ga-spy-log.html) for a more robust example.
 ![Screenshot: custom ga command console log](examples/ga-spy-log.screenshot.png)
     
+    
+# Contributing
 
-## License
+Versioning follows http://semver.org (or at least tries to).
+
 Licensed under the MIT license.
+
 
