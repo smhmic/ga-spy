@@ -129,7 +129,7 @@
     }else{ try{ 
       if( ! processArgs( a ) ) return; 
     }catch(ex){}}
-    return proxy.gaOrig.apply( proxy.gaOrig, a );
+    return proxy._gaOrig.apply( proxy._gaOrig, a );
   },
       
   /** 
@@ -138,8 +138,8 @@
    */
   hijack = function(){
     // The current global GA object. Could be the command queue or the loaded GA object.
-    var k, gaOrig = proxy.gaOrig = window[gaObjName];
-    log( 'Hijack', gaOrig.gaOrig ? '(already hijacked)' : '' );
+    var k, gaOrig = proxy._gaOrig = window[gaObjName];
+    log( 'Hijack', gaOrig._gaOrig ? '(already hijacked)' : '' );
     // Replace GA object with a proxy.
     window[gaObjName] = proxy;
     // Maintain references to GA's public interface. 
