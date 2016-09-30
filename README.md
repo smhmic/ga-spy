@@ -63,16 +63,16 @@ gaSpy( {
   // Return false to prevent command from being passed to analytics.js.
   'callback' : function( 
   
-    args, // Array of arguments passed to `ga()`.
-          // https://goo.gl/muCY7Q
+    event.args, // Array of arguments passed to `ga()`.
+                // https://goo.gl/muCY7Q
     
-    the,  // Object including tracker name, plugin name/method/etc parsed from the command.
-          // the.command
-          // the.trackerName
-          // the.hitType
-          // the.pluginName
-          // the.pluginMethodName
-          // the.callback
+    event.the   // Object including tracker name, plugin name/method/etc parsed from the command.
+                // the.command
+                // the.trackerName
+                // the.hitType
+                // the.pluginName
+                // the.pluginMethodName
+                // the.callback
   ){
   	// Your custom code goes here.
   }

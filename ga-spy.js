@@ -18,20 +18,21 @@
  * this must run before the code that loads analytics.js.
  *
  * @author Stephen M Harris <smhmic@gmail.com>
- * @version 0.8
+ * @version 0.9
  */
 
 /**
  * @callback gaSpyCb 
  * Function to call whenever `ga()` is called.
- * @param {Array}  a      - Arguments passed to `ga()`. @link https://goo.gl/muCY7Q
- * @param {Object} the    - Provides tracker name, plugin name/method/etc parsed from the command.
- *     @param {Function|undefined} the.callback
- *     @param   {string|undefined} the.command
- *     @param   {string|undefined} the.trackerName
- *     @param   {string|undefined} the.hitType
- *     @param   {string|undefined} the.pluginName
- *     @param   {string|undefined} the.pluginMethodName
+ * @param {Object} event  - Provides original and parsed command arguments.
+ *   @param {Array}  event.args - Arguments passed to `ga()`. @link https://goo.gl/muCY7Q
+ *   @param {Object} event.the  - Provides tracker name, plugin name/method/etc parsed from the command.
+ *     @param {Function|undefined} event.the.callback
+ *     @param   {string|undefined} event.the.command
+ *     @param   {string|undefined} event.the.trackerName
+ *     @param   {string|undefined} event.the.hitType
+ *     @param   {string|undefined} event.the.pluginName
+ *     @param   {string|undefined} event.the.pluginMethodName
  * @return {boolean|*} - Return false to prevent command from being passed to analytics.js.
  */
 
@@ -80,8 +81,7 @@
    * @returns {boolean} - Returns false to indicate this command should be blocked.
    */
   processArgs = function( a ){
-    // Parse command according to https://developers.google.com/analytics/devguides/collection/analyticsjs/command-queue-reference
-    var _commandParts, the = {};
+    var _commandParts, ev = { args:a, the:{} }, the = ev.the;
     config.debug && (function(l,i){
       for( l='Intercepted: ga(',i=0; i<a.length; i++ ){
         l += 'string' === typeof a[i] ? '"'+a[i]+'"' : a[i];
@@ -90,6 +90,7 @@
       l += ')';
       log(l);
     })();
+    // Parse command according to https://developers.google.com/analytics/devguides/collection/analyticsjs/command-queue-reference
     if( 'function' === typeof a[0] ){
       the.callback = a[0];
     }else if( a[0] && a[0].split ){
@@ -111,7 +112,7 @@
       }
     }
     log( 'Run listener callback', the );
-    if( false === config.callback( a, the ) )
+    if( false === config.callback( ev ) )
       return log( 'Block hit' ) || false;
     else return true;
   },
