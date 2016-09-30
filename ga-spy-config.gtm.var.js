@@ -1,12 +1,12 @@
 /**
  * GA Spy configuration.
- * https://github.com/smhmic/gaSpy#configuration
+ * https://github.com/smhmic/ga-spy#configuration
  */
 function(){
   return {
     
     // Function to call whenever `ga()` is called.
-    'callback' : function( args, the ){
+    'callback' : function( ev ){
       
       //
       //   Your custom code goes here. 
