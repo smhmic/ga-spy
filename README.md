@@ -6,6 +6,8 @@ The focus is listening to integrations with analytics.js (Universal Analytics).
 There is a version of this listener for asynchonous tracking with ga.js, but it is not actively maintained, 
 and may be missing bugfixes and features present in the Universal Analytics listener.
 
+For a methodology walkthrough, see [the introductory blog post](http://www.simoahava.com/analytics/introducing-ga-spy-for-google-analytics/).
+
 ## Uses
 
 This started out as a GTM listener for non-GTM-based GA tracking (hardcoded tracking),
