@@ -102,7 +102,7 @@
         if( the.command === 'provide' ) the.pluginConstructor = a[2];
       }else{
         if( the.command === 'send' )
-          the.hitType = a[a.length-1].hitType || a[1];
+          the.hitType = ( a[a.length-1] && a[a.length-1].hitType ) || a[1];
         if( 'object' === typeof a[a.length-1] ){
           the.trackerName = a[a.length-1].name || the.trackerName;
         }
@@ -110,7 +110,7 @@
     }
     log( 'Run listener callback', the );
     if( false === config.callback( ev ) )
-      return log( 'Block hit' ) || false;
+      return false;
     else return true;
   },
       
@@ -123,10 +123,11 @@
   proxy = function(){
     var a = [].slice.call( arguments );
     if( config.debug ){ 
-      if( ! processArgs( a ) ) return; 
+      if( ! processArgs( a ) ) return log( 'Command blocked.' ); 
     }else{ try{ 
       if( ! processArgs( a ) ) return; 
     }catch(ex){}}
+    log( 'Command allowed:', a );
     return proxy._gaOrig.apply( proxy._gaOrig, a );
   },
       
