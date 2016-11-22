@@ -37,7 +37,7 @@
  */
 
 /** 
- * @function gaSpy
+ * @function gaSpy - Listener for commands passed to the UA library.
  * @param {Object|function} listenerCallback_or_configObj - If function, will be treated as `callback` of 
  *                                                          listener config, otherwise listener config object.
  *     @property {gaSpyCb}  callback  - Function to call whenever `ga()` is called.
@@ -50,18 +50,15 @@
   /** Listener configuration. **/
   var config = (function( config ){
     listenerCallback_or_configObj = null;
+    config.debugLogPrefix = config.debugLogPrefix || 'gaSpy';
     if( !config.callback || 'function' !== typeof config.callback )
       throw new Error( '['+config.debugLogPrefix+'] Aborting; No listener callback provided.' );
     config.gaObjName = config.gaObjName || window.GoogleAnalyticsObject || 'ga';
     config.debug = !!config.debug;
-    config.debugLogPrefix = config.debugLogPrefix || 'gaSpy';
     return config;
   })('function' === typeof listenerCallback_or_configObj
     ? { 'callback' : listenerCallback_or_configObj }
     : listenerCallback_or_configObj ),
-  
-  /** Temp vars for processing GA command queue. */
-  q, i,
    
   /** The name of the global ga object. */
   gaObjName = config.gaObjName,
@@ -147,7 +144,9 @@
     for( k in gaOrig )
       if( gaOrig.hasOwnProperty( k ) )
         window[gaObjName][k] = gaOrig[k];
-  };
+  },
+      
+  q, i;
     
   log( 'Config:', config );
     
