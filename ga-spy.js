@@ -51,10 +51,13 @@
   var config = (function( config ){
     listenerCallback_or_configObj = null;
     config.debugLogPrefix = config.debugLogPrefix || 'gaSpy';
-    if( !config.callback || 'function' !== typeof config.callback )
-      throw new Error( '['+config.debugLogPrefix+'] Aborting; No listener callback provided.' );
-    config.gaObjName = config.gaObjName || window.GoogleAnalyticsObject || 'ga';
     config.debug = !!config.debug;
+    if( !config.callback || 'function' !== typeof config.callback ){
+      if( config.debug )
+        throw new Error( '[' + config.debugLogPrefix + '] Aborting; No listener callback provided.' );
+      config.callback = function(){};
+    }
+    config.gaObjName = config.gaObjName || window.GoogleAnalyticsObject || 'ga';
     return config;
   })('function' === typeof listenerCallback_or_configObj
     ? { 'callback' : listenerCallback_or_configObj }
@@ -172,7 +175,7 @@
     } else { ga.q = []; }
     ga( hijack ); // Set a trap to re-hijack once GA is loaded.
     hijack(); // Hijack the command queue.
-  } else {
+  } else if( config.debug ) {
     throw new Error( '['+config.debugLogPrefix+'] Aborting; `'+gaObjName+'` not the GA object.' );
   }
 
