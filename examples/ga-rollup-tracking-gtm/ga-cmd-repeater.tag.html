@@ -1,0 +1,189 @@
+<script title="GaCmdRepeater">
+'use strict';
+/**
+ * GA Command Repeater
+ * 
+ * Piggybacks off on existing tracking to send duplicate GA hits 
+ * (differing only in configurable trackingId and/or other params)
+ *
+ * @author Stephen M Harris <smhmic@gmail.com>
+ * @version v0.2.0
+ * 
+ * CHANGELOG:
+ * - v0.2.0 - fixed critical bug where empty config.predicates (or altered prototypes) broke plugin.
+ * - v0.1.0 - init
+ */
+/*
+=============
+METHODS:
+ 
+ a) add repeater triggers for every trigger (old; sahava method)
+ 
+ b) [GtmTagRepeater] add repeater events for every GTM event (NEW)
+ 
+ c) [GaCmdRepeater] (THIS SCRIPT) duplicate every command to additional trackers (just appending to the tracker name) (NEW)
+ 
+ d) [GaHitRepeater] use Tasks API to duplicate MP hits (NEWish)
+ 
+
+=============
+NOTES:
+ 
+Currently ignoring pushed callback fns; potential issues?
+ 
+Currently ignoring `require` calls; generally cannot access mods from plugins with this method anyway (need to use Tasks API for that)
+
+Could skip linker:autoLink if using same ga cookie? And cid? And ..? In cases where these are custom values then vanilla autolinker will not cut it anyway ... so i think it can be always skipped.   ga("gtm286.require", "linker");  ga("gtm286.linker:autoLink", ["a.org", "b.org", "c.com"], false, false);
+ 
+TODO: How to handle hitCallback? Leave it on dupe hits? Remove it? Leave on only on last hit?  Currently it's left along so it's likely being called for the orig and each duped hit.
+          
+TODO: update config to be more flexible:
+    filter : null, // Fn ran against each extra hit config on page load to determine which is active.  If string, will be matched against `extraHit.filter` fields that are strings or regexes.
+    extraHit : [
+      {
+        'filter' : '/sompath', // Run on page load to determine if this hit config will be active.  Can be custom fn, or if string or regex will be used by default config.filter() to determine if config should apply.
+        'hit' : { ga fields } OR function(){} OR string(tid)
+        'filterEach' : function(){}, // Run on every 
+      }
+    ]
+*/
+
+(function(){
+  
+  var config = {{GaCmdRepeater Config}},
+  matches, data, i,m,
+      
+  // use object instead of array to simplify looping and existing checks.
+  createCommandOnly = {
+    'trackingId'          : null,
+    'clientId'            : null,
+    'sampleRate'          : null,
+    'siteSpeedSampleRate' : null,
+    'alwaysSendReferrer'  : null,
+    'allowAnchor'         : null,
+    'cookieName'          : null,
+    'cookieDomain'        : null,
+    'cookieExpires'       : null,
+    'legacyCookieDomain'  : null,
+    'legacyHistoryImport' : null,
+    'allowLinker'         : null,
+  },
+  
+  log = window.console && config.debug
+    ? function(){var a=[].slice.call(arguments);a.unshift('[GaCmdRepeater]');console.debug.apply(console,a)} 
+    : function(){};
+  
+  // Find additional configurations.
+  matches = [];
+  for( i=0; i<config.predicates.length; i++ ){
+    if( config.match.match( config.predicates[i][0] ) ){
+      data = config.predicates[i][1];
+      if( typeof data === 'string' ) data = { 'trackingId': data };
+      if( data ) matches.push(data);
+    }
+  }
+  for( i=0; i<matches.length; i++ ){
+    m = matches[i];
+    if( ! m._opts ) m._opts = {};
+    if( 'string' !== m._opts.trackerNameSuffix ) m._opts.trackerNameSuffix = '_repeat'+(i+1);
+  }
+
+  log( "Commands will be repeated "+matches.length+'x.', matches );
+  
+  if( ! matches.length ){
+    return;
+  }
+    
+  (function(b){var d,e,c=function(a){if(b=null,!a.callback||"function"!=typeof a.callback)throw new Error("["+a.debugLogPrefix+"] Aborting; No listener callback provided.");return a.gaObjName=a.gaObjName||window.GoogleAnalyticsObject||"ga",a.debug=!!a.debug,a.debugLogPrefix=a.debugLogPrefix||"gaSpy",a}("function"==typeof b?{callback:b}:b),f=c.gaObjName,g=window[f],h=window.console&&c.debug?function(){var a=[].slice.call(arguments);a.unshift("["+c.debugLogPrefix+"]"),console.log.apply(console,a)}:function(){},i=function(a){var b,d={args:a,the:{}},e=d.the;return c.debug&&function(b,c){for(b="Intercepted: ga(",c=0;c<a.length;c++)b+="string"==typeof a[c]?'"'+a[c]+'"':a[c],c+1<a.length&&(b+=", ");b+=")",h(b)}(),"function"==typeof a[0]?e.callback=a[0]:a[0]&&a[0].split&&(b=a[0].split("."),e.trackerName=b.length>1?b[0]:"t0",e.command=b.length>1?b[1]:b[0],b=b[b.length-1].split(":"),e.pluginName=b.length>1?b[0]:void 0,e.pluginMethodName=b.length>1?b[1]:void 0,"require"===e.command||"provide"===e.command?(e.pluginName=a[1],"provide"===e.command&&(e.pluginConstructor=a[2])):("send"===e.command&&(e.hitType=a[a.length-1].hitType||a[1]),"object"==typeof a[a.length-1]&&(e.trackerName=a[a.length-1].name||e.trackerName))),h("Run listener callback",e),!1!==c.callback(d)||(h("Block hit")||!1)},j=function(){var a=[].slice.call(arguments);if(c.debug){if(!i(a))return}else try{if(!i(a))return}catch(a){}return j._gaOrig.apply(j._gaOrig,a)},k=function(){var a,b=j._gaOrig=window[f];h("Hijack",b._gaOrig?"(already hijacked)":""),window[f]=j;for(a in b)b.hasOwnProperty(a)&&(window[f][a]=b[a])};if(h("Config:",c),g||(h("Instantiate GA command queue"),g=window[f]=function(){(window[f].q=window[f].q||[]).push(arguments)},g.l=1*new Date),g.getAll)h("GA already loaded; cannot see previous commands"),k();else{if(!g.l)throw new Error("["+c.debugLogPrefix+"] Aborting; `"+f+"` not the GA object.");if(h("Command queue instantiated, but library not yet loaded"),g.q&&g.q.length){for(h("Applying listener to",g.q.length," queued commands"),d=[],e=0;e<g.q.length;e++)i([].slice.call(g.q[e]))&&d.push(g.q[e]);g.q=d}else g.q=[];g(k),k()}}
+  )({ 
+    debug: 0,//config.debug,
+  
+    callback : function _gaSpy_cb_( ev ){
+          
+      var i, m, k, setCmd, hitDisplayName, the = ev.the, args = ev.args, ga = ( window[ window['GoogleAnalyticsObject'] || 'ga' ] );
+      
+      while( '_gaOrig' in ga ) ga = ga._gaOrig; // TODO: protect against inf loop
+      
+      if( !the.command
+        || the.command === 'provide'
+        || !( the.trackerName && the.trackerName.indexOf('gtm') === 0 ) )
+        return;
+      
+      // Avoid repeating repeated hits.  
+      // TODO: This should be able to be removed, just here for now as a precaution.
+      if( the.trackerName && the.trackerName.match(/_repeat\d+$/) )
+        return;
+      
+      //TODO: how to handle the hitCallback?  Leave it on dupe hits? Remove it? Leave on only on last hit?
+          
+      // Fire original hit first (and block from firing after by returning false form this cb).
+      //log( 'Firing unmodified original command' );
+      ga.apply( this, args );
+      
+      if( config.debug && window.console && console.groupCollapsed ){
+        hitDisplayName = the.trackerName+'.'+the.command+(args[1]?'.'+args[1]:'');
+        console.groupCollapsed( '[GaCmdRepeater] Repeat '+hitDisplayName+' '+matches.length+'x.' );
+      }
+      
+      args = JSON.stringify(args);
+      
+      for( i=0; i<matches.length; i++ ){
+        (function(m,args){
+          
+          log( m._opts && m._opts.trackerNameSuffix, m );
+  
+          // Alter params for separate tracker.
+          if( the.command === 'create' ){
+            if( typeof args[ 3 ] === 'string' )
+              args[ 3 ] += m._opts.trackerNameSuffix;
+            else {
+              if( typeof args[ args.length - 1 ] !== 'object' ) args.push( {} );
+              if( !args[ args.length - 1 ].name )
+                args[ args.length - 1 ].name = 't0';
+              args[ args.length - 1 ].name += m._opts.trackerNameSuffix;
+            }
+          } else if( args[ 0 ].indexOf( '.' ) ){
+            args[ 0 ] = args[ 0 ].replace( '.', m._opts.trackerNameSuffix + '.' );
+          } else {
+            args[ 0 ] = 't0' + m._opts.trackerNameSuffix + args[ 0 ];
+          }
+  
+          // Add fields for create command.
+          if( the.command === 'create' ){
+            for( k in createCommandOnly ){
+              if( k === 'trackingId' && typeof args[ 1 ] === 'string' ){
+                args[ 1 ] = m[ k ];
+                continue;
+              }
+              if( k in m ){
+                if( typeof args[ args.length - 1 ] !== 'object' ) args.push( {} );
+                args[ args.length - 1 ][ k ] = m[ k ];
+              }
+            }
+          }
+  
+          // Set additional params before sending hit.
+          if( the.command === 'send' ){
+            setCmd = args[ 0 ].replace( '.send', '.set' );
+            for( k in m ){
+              if( ! m.hasOwnProperty(k) ) continue;
+              if( k === '_opts' ) continue;
+              if( k in createCommandOnly ) continue;
+              ga( setCmd, k, m[ k ] );
+            }
+          }
+  
+          ga.apply( this, args );
+          
+        })( matches[ i ], JSON.parse(args) );//[].slice.call(args) );
+      }
+      
+      if( hitDisplayName ) console.groupEnd();
+      
+      // Original already fired above; block from firing again.
+      return false;
+    }
+  });
+
+})();
+</script>
