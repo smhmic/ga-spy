@@ -3,7 +3,7 @@
 /**
  * GA Command Repeater
  * 
- * Piggybacks off on existing tracking to send duplicate GA hits 
+ * Piggybacks off of existing tracking to send duplicate GA hits 
  * (differing only in configurable trackingId and/or other params)
  *
  * @author Stephen M Harris <smhmic@gmail.com>
@@ -13,40 +13,6 @@
  * - v0.2.0 - fixed critical bug where empty config.predicates (or altered prototypes) broke plugin.
  * - v0.1.0 - init
  */
-/*
-=============
-METHODS:
- 
- a) add repeater triggers for every trigger (old; sahava method)
- 
- b) [GtmTagRepeater] add repeater events for every GTM event (NEW)
- 
- c) [GaCmdRepeater] (THIS SCRIPT) duplicate every command to additional trackers (just appending to the tracker name) (NEW)
- 
- d) [GaHitRepeater] use Tasks API to duplicate MP hits (NEWish)
- 
-
-=============
-NOTES:
- 
-Currently ignoring pushed callback fns; potential issues?
- 
-Currently ignoring `require` calls; generally cannot access mods from plugins with this method anyway (need to use Tasks API for that)
-
-Could skip linker:autoLink if using same ga cookie? And cid? And ..? In cases where these are custom values then vanilla autolinker will not cut it anyway ... so i think it can be always skipped.   ga("gtm286.require", "linker");  ga("gtm286.linker:autoLink", ["a.org", "b.org", "c.com"], false, false);
- 
-TODO: How to handle hitCallback? Leave it on dupe hits? Remove it? Leave on only on last hit?  Currently it's left along so it's likely being called for the orig and each duped hit.
-          
-TODO: update config to be more flexible:
-    filter : null, // Fn ran against each extra hit config on page load to determine which is active.  If string, will be matched against `extraHit.filter` fields that are strings or regexes.
-    extraHit : [
-      {
-        'filter' : '/sompath', // Run on page load to determine if this hit config will be active.  Can be custom fn, or if string or regex will be used by default config.filter() to determine if config should apply.
-        'hit' : { ga fields } OR function(){} OR string(tid)
-        'filterEach' : function(){}, // Run on every 
-      }
-    ]
-*/
 
 (function(){
   
