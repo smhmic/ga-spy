@@ -25,6 +25,11 @@ About replacing (B) with (C)(this script): code-wise, this change was a complete
 
 ## NOTES
 
+Known issues:
+- does not repeat product data for EEC
+- does not repeat customTask https://screencast.com/t/5VfmIQ3i2hMG
+- does not repeat hitCallback https://screencast.com/t/pbmHI4XLtI1
+
 Currently ignoring pushed callback fns; potential issues?
 
 How to handle hitCallback? Leave it on dupe hits? Remove it? Leave on only on last hit?  Currently it's left along so it's likely being called for the orig and each duped hit.
@@ -32,7 +37,8 @@ How to handle hitCallback? Leave it on dupe hits? Remove it? Leave on only on la
 Currently ignoring `require` calls; generally cannot access mods from plugins with this method anyway (need to use Tasks API for that)
 
 Could skip linker:autoLink if using same ga cookie? And cid? And ..? In cases where these are custom values then vanilla autolinker will not cut it anyway ... so i think it can be always skipped.   ga("gtm286.require", "linker");  ga("gtm286.linker:autoLink", ["a.org", "b.org", "c.com"], false, false);
-        
+
+For varying tids, does displayfeatures cookie name need to be updated? https://screencast.com/t/9U3Q40Uuo
          
 TODO: update config to be more flexible:
     filter : null, // Fn ran against each extra hit config on page load to determine which is active.  If string, will be matched against `extraHit.filter` fields that are strings or regexes.
