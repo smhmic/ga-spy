@@ -30,7 +30,7 @@ But there are many more uses in GTM and out.
 To use in GTM, place the contents of ga-spy.gtm.tag.html into a custom html tag,
 then use one of the custom listeners below.
 
-If you use ga-spy.gtm.tag.html as the Tag, then you can place the listsner code into
+If you use ga-spy.gtm.tag.html as the Tag, then you can place the listener code into
 a Variable named `GA Spy Config` (using ga-spy-config.gtm.var.js as a template). 
 This way, you can easily update the core GA Spy without having
 worry about preserving your custom code.  
